@@ -16,8 +16,8 @@
 
 var config = {
     type: Phaser.AUTO,
-    width: 800,
-    height: 600,
+    width: 1600,
+    height: 1200,
     physics: {
         default: 'arcade',
         arcade: {
@@ -33,6 +33,7 @@ var config = {
 };
 
 var player;
+var player1;
 var stars;
 var bombs;
 var platforms;
@@ -45,11 +46,53 @@ var game = new Phaser.Game(config);
 
 function preload ()
 {
-    this.load.image('sky', 'assets/sky.png');
-    this.load.image('ground', 'assets/platform.png');
-    this.load.image('star', 'assets/star.png');
-    this.load.image('bomb', 'assets/bomb.png');
-    this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
+    this.load.image('sky', 'photos/sky.png');
+    this.load.image('ground', 'photos/platform.png');
+    this.load.image('star', 'photos/star.png');
+    this.load.image('bomb', 'photos/bomb.png');
+    this.load.image('cadeado', 'photos/cadeado.png');
+    this.load.image('abertura', 'photos/abertura.png');
+    this.load.spritesheet('dude', 'photos/dude.png', { frameWidth: 32, frameHeight: 48 });
+    this.load.spritesheet('jose', 'photos/jose.png', { frameWidth: 32, frameHeight: 48 });
+
+}
+
+{
+  
+    var keys = this.input.keyboard.addKeys({ Left:'a',Right:'d'});
+    //-> { up: Key, left:Key, down:Key, right:Key}
+}
+
+{
+    // Importar a próxima cena
+import {servidor} from "./VENTO-";
+
+// Criar a cena 0
+var abertura= new Phaser.Scene("abertura");
+
+cena0.preload = function () {
+  // Imagem de fundo
+  this.load.image("cadeado", "photos/abertura.png");
+};
+
+cena0.create = function () {
+  // Botão com a imagem de fundo
+  var button = this.add.image(400, 300, "cadeado", 0).setInteractive();
+
+  // Ao clicar no botão, inicia a cena 1
+  button.on(
+    "pointerdown",
+    function () {
+      this.scene.start(servidor.js);
+    },
+    this
+  );
+};
+
+abertura.update = function () {};
+
+// Exportar a cena
+export { abertura };
 }
 
 function create ()
@@ -62,12 +105,12 @@ function create ()
 
     //  Here we create the ground.
     //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
-    platforms.create(400, 568, 'ground').setScale(2).refreshBody();
+    platforms.create(900, 568, 'ground').setScale(3).refreshBody();
 
     //  Now let's create some ledges
-    platforms.create(600, 400, 'ground');
-    platforms.create(50, 250, 'ground');
-    platforms.create(750, 220, 'ground');
+    platforms.create(550, 400, 'ground');
+    platforms.create(150, 260, 'ground');
+    platforms.create(600, 350, 'ground');
 
     // The player and its settings
     player = this.physics.add.sprite(100, 450, 'dude');
@@ -75,6 +118,14 @@ function create ()
     //  Player physics properties. Give the little guy a slight bounce.
     player.setBounce(0.2);
     player.setCollideWorldBounds(true);
+
+    // The player and its settings
+    player1 = this.physics.add.sprite(100, 450, 'jose');
+
+
+    //  Player physics properties. Give the little guy a slight bounce.
+    player1.setBounce(0.2);
+    player1.setCollideWorldBounds(true);
 
     //  Our player animations, turning, walking left and walking right.
     this.anims.create({
@@ -93,6 +144,27 @@ function create ()
     this.anims.create({
         key: 'right',
         frames: this.anims.generateFrameNumbers('dude', { start: 5, end: 8 }),
+        frameRate: 10,
+        repeat: -1
+    });
+
+    //  Our player animations, turning, walking left and walking right.
+    this.anims.create({
+        keys: 'left',
+        frames: this.anims.generateFrameNumbers('jose', { start: 0, end: 4 }),
+        frameRate: 10,
+        repeat: -1
+    });
+
+    this.anims.create({
+        keys: 'turn',
+        frames: [ { key: 'jose', frame: 5 } ],
+        frameRate: 20
+    });
+
+    this.anims.create({
+        keys: 'right',
+        frames: this.anims.generateFrameNumbers('jose', { start: 6, end: 10 }),
         frameRate: 10,
         repeat: -1
     });
@@ -120,14 +192,19 @@ function create ()
     scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
 
     //  Collide the player and the stars with the platforms
-    this.physics.add.collider(player, platforms);
+    this.physics.add.collider(player,platforms);
+    this.physics.add.collider(player1,platforms);
     this.physics.add.collider(stars, platforms);
     this.physics.add.collider(bombs, platforms);
 
     //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
     this.physics.add.overlap(player, stars, collectStar, null, this);
 
+    this.physics.add.overlap(player1, stars, collectStar, null, this);
+
     this.physics.add.collider(player, bombs, hitBomb, null, this);
+
+    this.physics.add.collider(player1, bombs, hitBomb, null, this);
 }
 
 function update ()
@@ -166,6 +243,43 @@ function collectStar (player, star)
 {
     star.disableBody(true, true);
 
+
+    function update ()
+{
+    if (gameOver)
+    {
+        return;
+    }
+
+    if (cursors.left.isDown)
+    {
+        player1.setVelocityX(-160);
+
+        player1.anims.play ('left', true);
+    }
+    else if (cursors.right.isDown)
+    {
+        player1.setVelocityX(160);
+
+        player1.anims.play('right', true);
+    }
+    else
+    {
+        player1.setVelocityX(0);
+
+        player1.anims.play('turn');
+    }
+
+    if (cursors.up.isDown && player1.body.touching.down)
+    {
+        player1.setVelocityY(-330);
+    }
+}
+
+function collectStar (player1, star)
+{
+    star.disableBody(true, true);
+
     //  Add and update the score
     score += 10;
     scoreText.setText('Score: ' + score);
@@ -181,6 +295,8 @@ function collectStar (player, star)
 
         var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
 
+        var x = (player1.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+
         var bomb = bombs.create(x, 16, 'bomb');
         bomb.setBounce(1);
         bomb.setCollideWorldBounds(true);
@@ -189,7 +305,7 @@ function collectStar (player, star)
 
     }
 }
-
+}
 function hitBomb (player, bomb)
 {
     this.physics.pause();
@@ -199,7 +315,18 @@ function hitBomb (player, bomb)
     player.anims.play('turn');
 
     gameOver = true;
-}
+
+
+    function hitBomb (player1, bomb)
+{
+    this.physics.pause();
+
+    player1.setTint(0xff0000);
+
+    player1.anims.play('turn');
+
+    gameOver = true;
+}}
 
 </script>
 
