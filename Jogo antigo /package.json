@@ -1,0 +1,23 @@
+{
+  "dependencies": {
+    "express": "^4.17.3"
+  },
+  "name": "vento-",
+  "description": "Este foi um jogo desenvolvido na última fase do curso de Telecomunicações de 2022.",
+  "version": "1.0.0",
+  "main": "./cliente/servidor.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/E-M-I-L-I/Vento-.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/E-M-I-L-I/Vento-/issues"
+  },
+  "homepage": "https://github.com/E-M-I-L-I/Vento-#readme"
+}
